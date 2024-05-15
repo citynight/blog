@@ -1,10 +1,10 @@
 import type { NavigationLink, Site, User } from './types.ts'
 
 export const SITE: Site = {
-    author: 'Godruoyi',
-    url: 'https://godruoyi.com',
-    title: 'Gblog',
-    description: 'Gblog is an open-source, simple, and beautiful blog built with Astro',
+    author: 'Logan',
+    url: 'https://1m.fit',
+    title: 'Blog',
+    description: '我的碎碎念，记录随笔，分享生活。',
     shortDescription: '',
 }
 
