@@ -3,7 +3,7 @@ import type { NavigationLink, Site, User } from './types.ts'
 export const SITE: Site = {
     author: 'Logan',
     url: 'https://1m.fit',
-    title: 'Blog',
+    title: '碎碎念',
     description: '我的碎碎念，记录随笔，分享生活。',
     shortDescription: '',
 }
