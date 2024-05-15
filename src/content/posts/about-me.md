@@ -1,11 +1,11 @@
 ---
-title: "Gblog, a beautiful blog built with Astro"
-description: "Gblog is a blog template designed for those who are unable or unwilling to write frontend code"
+title: "blog, a beautiful blog built with Astro"
+description: "blog is a blog template designed for those who are unable or unwilling to write frontend code"
 pubDate: "2024-05-15 13:00:00"
 category: "astro"
 cardImage: "@images/banners/gblog-2.jpg"
 cardImage2: "@images/banners/gblog.jpg"
-tags: ["Gblog", "Astro", "Godruoyi"]
+tags: ["碎碎念", "citynight", " Logan"]
 selected: true
 ---
 
