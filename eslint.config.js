@@ -8,7 +8,7 @@ export default antfu({
 
     react: true,
     typescript: true,
-    vue: true,
+    vue: false,
     astro: true,
 
     rules: {
