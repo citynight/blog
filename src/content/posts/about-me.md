@@ -3,8 +3,8 @@ title: "About Me"
 description: "Logan，14年开始北漂先后就职于微指、用友，目前就职于金桥"
 pubDate: "2024-05-16 15:40:00"
 category: "life"
-cardImage: "@images/banners/gblog-2.jpg"
-cardImage2: "@images/banners/gblog.jpg"
+banner: "@images/banners/gblog-2.jpg"
+banner2: "@images/banners/gblog.jpg"
 tags: ["life"]
 selected: true
 ---

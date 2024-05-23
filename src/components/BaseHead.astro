@@ -2,27 +2,33 @@
 import faviconSvgSrc from '@images/icon.svg'
 import { getImage } from 'astro:assets'
 import faviconSrc from '@images/icon.png'
-import socialSrc from '@images/social-home.png'
+import brandSrc from '@images/brand-logo.jpeg'
 import { SEO, SITE } from '../config'
 
 interface Props {
     title: string
     description: string
-    ogImage?: string
+    ogImage?: any
     ogTitle?: string
     ogDescription?: string
     structuredData?: object
 }
 
 const canonicalURL = Astro.url.href
-const {
+let {
     title,
     description,
-    ogImage = socialSrc,
+    ogImage,
     ogTitle = title,
     ogDescription = description,
     structuredData = SEO.structuredData,
 } = Astro.props
+
+let card = 'summary_large_image'
+if (!ogImage) {
+    ogImage = brandSrc
+    card = 'summary'
+}
 
 const faviconSvg = await getImage({ src: faviconSvgSrc, format: 'svg' })
 const appleTouchIcon = await getImage({ src: faviconSrc, width: 180, height: 180, format: 'png' })
@@ -33,12 +39,12 @@ const socialImage = Astro.url.origin + socialImageRes.src
 <!-- Inject structured data https://developers.google.com/search/docs/advanced/structured-data/intro-structured-data -->
 {
     structuredData && (
-        <script
-            type="application/ld+json"
-            set:html={JSON.stringify(structuredData)}
-        />
-    )
-}
+    <script
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData)}
+    />
+        )
+    }
 
 <!-- Global Metadata -->
 <meta name="title" content={title} />
@@ -65,7 +71,7 @@ const socialImage = Astro.url.origin + socialImageRes.src
 <meta content="image/png" property="og:image:type" />
 
 <!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:card" content={card} />
 <meta property="twitter:url" content={Astro.url} />
 <meta property="twitter:domain" content={Astro.url} />
 <meta property="twitter:title" content={ogTitle} />
