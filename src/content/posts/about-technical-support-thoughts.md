@@ -3,7 +3,7 @@ title: "About Technical Support Thoughts"
 description: "最近在做售后技术支持方面的工作比较多，对于售后工作有了一些不同于研发的思考，所以想记录下来。"
 pubDate: "2025-05-23 20:30:00"
 category: "life"
-banner: "@images/banners/24年团建.PNG"
+banner: "@images/banners/mountain.jpg"
 tags: ["工作"]
 selected: false
 ---
