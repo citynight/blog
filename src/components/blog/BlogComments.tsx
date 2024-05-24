@@ -41,10 +41,10 @@ function BlogComments() {
                 ? (
                     <Giscus
                         id={id}
-                        repo="godruoyi/gblog"
-                        repoId="MDEwOlJlcG9zaXRvcnkxMjcyODI0NzA"
+                        repo="citynight/blog"
+                        repoId="R_kgDOL76h_A"
                         category="Announcements"
-                        categoryId="DIC_kwDOB5YtJs4CfZnX"
+                        categoryId="DIC_kwDOL76h_M4Cflb_"
                         mapping="title"
                         reactionsEnabled="1"
                         emitMetadata="0"
