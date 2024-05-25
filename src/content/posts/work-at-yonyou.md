@@ -26,7 +26,8 @@ selected: false
 
 <video id="video" controls="" poster="封面">
       <source id="mp4" src="https://github.com/citynight/blog-image/assets/7713239/8dc54dd2-409f-42d7-9da1-6dcbeb4b1a20" type="video/mp4">
-</videos>
+</video>
+
 
 10.0版本开始的个人中心设计图
 ![image](https://github.com/citynight/blog-image/assets/7713239/b5d3d551-bb35-45fb-8190-fd20e30ffbb1)
