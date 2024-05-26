@@ -4,7 +4,7 @@ description: "16年开始在用友工作，到21年9月离职。5年多的职业
 pubDate: "2024-05-25 21:35:00"
 category: "life"
 banner: "@images/banners/mountain-2.jpg"
-tags: ["life"]
+tags: ["work"]
 selected: false
 ---
 
