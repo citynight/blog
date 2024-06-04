@@ -61,8 +61,8 @@ export const FooterLinks = [
 ]
 
 export const GoogleAnalytics = {
-    enable: false,
-    id: 'G-TKQ4L3ZDSF',
+    enable: true,
+    id: 'G-75ZPTWVVP5',
 }
 
 export const SEO = {
