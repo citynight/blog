@@ -223,3 +223,190 @@ jdbc.password=123456
 MyBatis 通用 Mapper4 是一个 MyBatis 的扩展，它提供了一套简单的、通用的、基于注解的 Mapper 接口定义，简化了 Mapper 的开发，并提高了开发效率。
 github地址：https://github.com/abel533/Mapper
 
+建表
+![t_pay](https://github.com/citynight/blog-image/assets/7713239/15827e9e-4a6d-41e5-9a4d-83e21bed9c8c)
+```sql
+create table t_pay
+(
+    id          int unsigned auto_increment
+        primary key,
+    pay_no      varchar(50)                                not null comment '支付流水号',
+    order_no    varchar(50)                                not null comment '订单流水号',
+    user_id     int              default 1                 null comment '用户账号ID',
+    amount      decimal(8, 2)    default 9.90              not null comment '交易金额',
+    deleted     tinyint unsigned default '0'               not null comment '删除标志, 默认0不删除,1删除',
+    create_time timestamp        default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time timestamp        default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
+)
+    comment '支付交易表';
+
+INSERT INTO `spring-cloud-study`.t_pay (id, pay_no, order_no, user_id, amount, deleted, create_time, update_time) VALUES (1, 'pay202403121420', '202403121421', 1, 9.90, 0, '2024-03-12 14:23:55', '2024-03-12 19:05:02');
+INSERT INTO `spring-cloud-study`.t_pay (id, pay_no, order_no, user_id, amount, deleted, create_time, update_time) VALUES (2, 'pay202403122048', '202403122048', 1, 9.90, 0, '2024-03-12 20:58:37', '2024-03-12 21:05:02');
+INSERT INTO `spring-cloud-study`.t_pay (id, pay_no, order_no, user_id, amount, deleted, create_time, update_time) VALUES (3, 'pay202403130910', '202403130910', 0, 0.00, 0, '2024-03-12 21:52:33', '2024-03-13 09:10:27');
+INSERT INTO `spring-cloud-study`.t_pay (id, pay_no, order_no, user_id, amount, deleted, create_time, update_time) VALUES (5, 'pay2024031220499', '20240312204799', 1, 9.90, 0, '2024-03-13 09:43:45', '2024-03-13 09:43:45');
+INSERT INTO `spring-cloud-study`.t_pay (id, pay_no, order_no, user_id, amount, deleted, create_time, update_time) VALUES (6, 'feign2024031220499', 'feign2024031220499', 1, 9.90, 0, '2024-03-14 22:53:59', '2024-03-14 22:53:59');
+```
+创建 `mybatis-generator` module 模块，添加依赖：
+![pom.xml](https://github.com/citynight/blog-image/assets/7713239/8f14054a-fe61-469d-a09c-d7b26f68356e)
+```xml
+    <dependencies>
+
+        <!-- 通用的mybatis在tk单独使用, 所以生成工具有自己的单独的版本号 -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.13</version>
+        </dependency>
+        <!-- generator -->
+        <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+        <!-- 通用 mapper -->
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+        </dependency>
+        <!-- mysql8驱动 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <!-- persistence -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <!-- hutool -->
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <!-- lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- spring-boot-starter-test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.iunit,vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.4.2</version>
+                <configuration>
+                    <configurationFile>${basedir}/src/main/resources/generatorConfig.xml</configurationFile>
+                    <overwrite>true</overwrite>
+                    <verbose>true</verbose>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>8.0.33</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>tk.mybatis</groupId>
+                        <artifactId>mapper</artifactId>
+                        <version>4.2.3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+```
+
+在 main 下创建 resources 目录，添加 config.properties 配置文件和 generatorConfig.xml 配置文件。
+
+其中 config.properties 配置文件：
+```properties
+# t_pay 表包名
+package.name=cn.citynight.cloud
+
+# mysql 8.0 spring-cloud-study
+jdbc.driverClass=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/spring-cloud-study?characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+jdbc.user=root
+jdbc.password=123456
+
+```
+
+generatorConfig.xml
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+
+    <properties resource="config.properties"/>
+
+    <context id="Mysql" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+            <property name="mappers" value="tk.mybatis.mapper.common.Mapper"/>
+            <property name="caseSensitive" value="true"/>
+        </plugin>
+
+        <jdbcConnection driverClass="${jdbc.driverClass}"
+                        connectionURL="${jdbc.url}"
+                        userId="${jdbc.user}"
+                        password="${jdbc.password}">
+        </jdbcConnection>
+
+        <javaModelGenerator targetPackage="${package.name}.entities" targetProject="src/main/java"/>
+        <sqlMapGenerator targetPackage="${package.name}.mapper" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="${package.name}.mapper" targetProject="src/main/java" type="XMLMAPPER"/>
+
+        <table tableName="t_pay" domainObjectName="Pay">
+            <generatedKey column="id" sqlStatement="JDBC"/>
+        </table>
+        
+    </context>
+</generatorConfiguration>
+
+```
+所有配置都设置好后，运行 mvn mybatis-generator:generate 生成实体类和 mapper。
+![generate](https://github.com/citynight/blog-image/assets/7713239/f8c68740-f33e-403f-ad9d-0f7ed7356b70)
+生成后的结果：
+![entities and mapper](https://github.com/citynight/blog-image/assets/7713239/1d183057-32e7-415c-a6b7-d44c9a9f8f11)
