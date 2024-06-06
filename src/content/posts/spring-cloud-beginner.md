@@ -7,7 +7,7 @@ banner: "@images/banners/mountain-2.jpg"
 tags: ["spring", "java"]
 selected: false
 ---
-
+# Maven 父工程
 ## 确认 IDEA 配置
 1. 字符编码
 ![File Encoding](https://github.com/citynight/blog-image/assets/7713239/ab0e69f3-04aa-4a23-a44a-ed2ccb81c6b9)
@@ -176,6 +176,42 @@ Maven 会沿着父子层次向上走，直到找到一个拥有 dependencyManage
 1. 这样当想升级或者切换到另一个版本时，只需要在父项目中升级或切换版本号就可以了，而不需要在每个子项目中一个一个的升级或切换版本号。
 2. 另外如果某个子项目需要另外一个版本号，那么只需要在子项目中声明对应的 version 即可。
 
-> 注意：dependencyManagement 元素中只是声明依赖，**并不引入实现**，也就是说，子项目不会继承父项目中的依赖需要显示的声明需要用的依赖。
-> 如果不在子项目中声明依赖，那么子项目将不会继承父项目中的依赖。只有在子项目中写了该依赖并且没有指定具体的版本号时，才会 从父项目中继承该依赖且 version 和 scope 都取自父 pom。
-> 如果子项目中指定了版本号，那么会使用子项目中指定的 jar 版本。
+> 注意：
+> 1. dependencyManagement 元素中只是声明依赖，**并不引入实现**，也就是说，子项目不会继承父项目中的依赖需要显示的声明需要用的依赖。
+> 2. 如果不在子项目中声明依赖，那么子项目将不会继承父项目中的依赖。只有在子项目中写了该依赖并且没有指定具体的版本号时，才会 从父项目中继承该依赖且 version 和 scope 都取自父 pom。
+> 3. 如果子项目中指定了版本号，那么会使用子项目中指定的 jar 版本。
+
+## Maven 中跳过单元测试
+方法1：
+![Skip Tests](https://github.com/citynight/blog-image/assets/7713239/2e47151b-97bc-4168-92f0-21888b23928f)
+
+方法2：配置
+```xml
+    <build>
+        <plugins>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                    <skip>true</skip>
+            </configuration>
+        </plugins>
+    </build>
+```
+推荐方式 1。直接点击跳过
+
+## MySql 数据库连接池配置
+1. 引入依赖
+```properties
+# mysql 8.0 --- JDBC 四件套
+jdbc.driverClassName=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/spring_cloud_beginner?characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+jdbc.username=root
+jdbc.password=123456
+```
+```xml
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>8.0.11</version>
+</dependency>
+```
