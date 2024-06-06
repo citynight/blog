@@ -3,7 +3,7 @@ title: "Spring Cloud 初学者"
 description: "从头开始学 SpringCloud"
 pubDate: "2024-06-05 17:04:00"
 category: "spring"
-banner: "@images/banners/mountain-2.jpg"
+banner: "@images/banners/spring.png"
 tags: ["spring", "java"]
 selected: false
 ---
@@ -215,3 +215,11 @@ jdbc.password=123456
     <version>8.0.11</version>
 </dependency>
 ```
+# Mapper4 一键生成
+## mybatis-generator
+官网地址：https://mybatis.org/generator/
+
+## MyBatis 通用 Mapper4
+MyBatis 通用 Mapper4 是一个 MyBatis 的扩展，它提供了一套简单的、通用的、基于注解的 Mapper 接口定义，简化了 Mapper 的开发，并提高了开发效率。
+github地址：https://github.com/abel533/Mapper
+
