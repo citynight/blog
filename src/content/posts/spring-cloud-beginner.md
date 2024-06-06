@@ -18,7 +18,7 @@ selected: false
 4. 文件过滤
 ![File Types](https://github.com/citynight/blog-image/assets/7713239/067b3177-e6ab-4d0c-82f5-a9885b8b93c3)
 
-## Maven 父工程配置
+## Maven 中的 dependencyManagement 和 dependencies
 配置后的父工程 pom 文件如下图，从第 11 行开始，是直接配置的，具体配置如下：
 ![pom](https://github.com/citynight/blog-image/assets/7713239/f0323bb6-e936-4b6a-8be7-86741f80dfee)
 
@@ -176,4 +176,6 @@ Maven 会沿着父子层次向上走，直到找到一个拥有 dependencyManage
 1. 这样当想升级或者切换到另一个版本时，只需要在父项目中升级或切换版本号就可以了，而不需要在每个子项目中一个一个的升级或切换版本号。
 2. 另外如果某个子项目需要另外一个版本号，那么只需要在子项目中声明对应的 version 即可。
 
-> 注意：dependencyManagement 元素中的依赖不会被传递给子项目，也就是说，子项目不会继承父项目中的依赖需要显示的声明需要用的依赖。
+> 注意：dependencyManagement 元素中只是声明依赖，**并不引入实现**，也就是说，子项目不会继承父项目中的依赖需要显示的声明需要用的依赖。
+> 如果不在子项目中声明依赖，那么子项目将不会继承父项目中的依赖。只有在子项目中写了该依赖并且没有指定具体的版本号时，才会 从父项目中继承该依赖且 version 和 scope 都取自父 pom。
+> 如果子项目中指定了版本号，那么会使用子项目中指定的 jar 版本。
