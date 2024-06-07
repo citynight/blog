@@ -635,4 +635,267 @@ public class PayController {
 }
 ```
 
+**postman测试**
+![postman](https://github.com/citynight/blog-image/assets/7713239/0bf5a52d-3401-4acd-9dd1-fdc9126aecf3)
 
+**swagger3测试**
+常用注解
+
+| 注解           | 标注位置              | 作用               |
+|--------------|-------------------|------------------|
+| @Tag *       | controller类       | 标识 controller 作用 |
+| @Parameter   | 参数                | 标识参数作用           |
+| @Parameters  | 参数                | 参数多重说明           |
+| @Schema *    | model 层的 JavaBean | 描述模型作用及每个属性      |
+| @Operation * | 方法                | 描述方法作用           |
+| @ApiResponse | 方法                | 描述响应状态码等         |
+
+> 最常用的是 @Tag 标记 controller 类，@Operation 标记方法。 和 @Schema entity 或者 DTO 。
+
+给 Pay 添加 对应的 swagger 注解
+```java
+
+/**
+ * 表名：t_pay
+ * 表注释：支付交易表
+*/
+@Table(name = "t_pay")
+@Schema(title = "支付交易表实体类")
+public class Pay {
+    @Id
+    @GeneratedValue(generator = "JDBC")
+    @Schema(title = "主键ID") 
+    private Integer id;
+
+    /**
+     * 支付流水号
+     */
+    @Column(name = "pay_no")
+    @Schema(title = "支付流水号")
+    private String payNo;
+
+    /**
+     * 订单流水号
+     */
+    @Column(name = "order_no")
+    @Schema(title = "订单流水号")
+    private String orderNo;
+
+    /**
+     * 用户账号ID
+     */
+    @Column(name = "user_id")
+    @Schema(title = "用户账号ID")
+    private Integer userId;
+
+    /**
+     * 交易金额
+     */
+    @Schema(title = "交易金额")
+    private BigDecimal amount;
+
+    /**
+     * 删除标志, 默认0不删除,1删除
+     */
+    @Schema(title = "删除标志, 默认0不删除,1删除")
+    private Byte deleted;
+
+    /**
+     * 创建时间
+     */
+    @Column(name = "create_time")
+    @Schema(title = "创建时间")
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    @Column(name = "update_time")
+    @Schema(title = "更新时间")
+    private Date updateTime;
+
+    /**
+     * @return id
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * @param id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取支付流水号
+     *
+     * @return payNo - 支付流水号
+     */
+    public String getPayNo() {
+        return payNo;
+    }
+
+    /**
+     * 设置支付流水号
+     *
+     * @param payNo 支付流水号
+     */
+    public void setPayNo(String payNo) {
+        this.payNo = payNo;
+    }
+
+    /**
+     * 获取订单流水号
+     *
+     * @return orderNo - 订单流水号
+     */
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    /**
+     * 设置订单流水号
+     *
+     * @param orderNo 订单流水号
+     */
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    /**
+     * 获取用户账号ID
+     *
+     * @return userId - 用户账号ID
+     */
+    public Integer getUserId() {
+        return userId;
+    }
+
+    /**
+     * 设置用户账号ID
+     *
+     * @param userId 用户账号ID
+     */
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * 获取交易金额
+     *
+     * @return amount - 交易金额
+     */
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    /**
+     * 设置交易金额
+     *
+     * @param amount 交易金额
+     */
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    /**
+     * 获取删除标志, 默认0不删除,1删除
+     *
+     * @return deleted - 删除标志, 默认0不删除,1删除
+     */
+    public Byte getDeleted() {
+        return deleted;
+    }
+
+    /**
+     * 设置删除标志, 默认0不删除,1删除
+     *
+     * @param deleted 删除标志, 默认0不删除,1删除
+     */
+    public void setDeleted(Byte deleted) {
+        this.deleted = deleted;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * 获取更新时间
+     *
+     * @return updateTime - 更新时间
+     */
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    /**
+     * 设置更新时间
+     *
+     * @param updateTime 更新时间
+     */
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+}
+```
+添加 swagger config
+```java
+
+import io.swagger.v3.oas.models.ExternalDocumentation;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class Swagger3Config {
+
+    @Bean
+    public GroupedOpenApi payApi() {
+        return GroupedOpenApi.builder().group("支付微服务模块").pathsToMatch("/pay/**").build();
+    }
+
+    @Bean
+    public GroupedOpenApi otherApi() {
+        return GroupedOpenApi.builder().group("其他微服务模块").pathsToMatch("/other/**").build();
+    }
+
+    @Bean
+    public OpenAPI docsOpenApi() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("spring-cloud")
+                        .description("通用设计")
+                        .version("v1.0")
+                )
+                .externalDocs(new ExternalDocumentation()
+                        .description("www.citynight.cn")
+                        .url("https://1m.fit")
+                );
+    }
+}
+```
+重启服务然后访问 http://localhost:8001/swagger-ui/index.html
+![swagger-ui](https://github.com/citynight/blog-image/assets/7713239/b32c0aeb-c86b-4511-9f50-eea7653e5fbf)
+
+尝试使用 swagger 测试
+![](https://github.com/citynight/blog-image/assets/7713239/7ea32cb8-8be3-4a6c-8d18-a3d90c2ef75e)
+![](https://github.com/citynight/blog-image/assets/7713239/33b7c2b1-e3c6-4208-9e89-2050979afe9f)
