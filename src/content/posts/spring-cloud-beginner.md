@@ -532,3 +532,107 @@ mybatis:
 
 4. 主启动
 ![main start](https://github.com/citynight/blog-image/assets/7713239/43fcaa31-9396-48f9-83cc-bb1603678e7e)
+
+5. 业务类
+
+把mybatis-generator 生成的 mapper 和 entities 拷贝到 cloud-provider-payment 模块下。如图：
+![move](https://github.com/citynight/blog-image/assets/7713239/d5b48830-fa6c-44e4-b07a-9c1742477c56)
+然后创建对应对应的 service 和 controller。
+
+service 接口
+```java
+public interface PayService {
+    int add(Pay pay);
+    int delete(Integer id);
+    int update(Pay pay);
+    Pay getById(Integer id);
+    List<Pay> getAll();
+}
+
+```
+
+service 实现类
+```java
+
+@Service
+public class PayServiceImpl implements PayService {
+
+    @Resource
+    private PayMapper payMapper;
+
+    @Override
+    public int add(Pay pay) {
+        return payMapper.insertSelective(pay);
+    }
+
+    @Override
+    public int delete(Integer id) {
+        return payMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int update(Pay pay) {
+        return payMapper.updateByPrimaryKeySelective(pay);
+    }
+
+    @Override
+    public Pay getById(Integer id) {
+        return payMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public List<Pay> getAll() {
+        return payMapper.selectAll();
+    }
+}
+
+```
+
+controller 实现
+```java
+
+@RestController
+@Slf4j
+public class PayController {
+    @Resource
+    private PayService payService;
+
+    @PostMapping("/pay/add")
+    public String addPay(@RequestBody Pay pay)
+    {
+        log.info("addPay:{}", pay);
+        int result = payService.add(pay);
+        return "成功插入记录，返回值：" + result;
+    }
+
+    @DeleteMapping("/pay/del/{id}")
+    public String deletePay(@PathVariable("id") Integer id)
+    {
+        log.info("deletePay:{}", id);
+        int result = payService.delete(id);
+        return "成功删除记录，返回值：" + result;
+    }
+
+
+    @PutMapping("/pay/update")
+    public String updatePay(@RequestBody PayDTO payDTO)
+    {
+        log.info("updatePay:{}", payDTO);
+        Pay pay = new Pay();
+        BeanUtils.copyProperties(payDTO, pay);
+        log.info("updatePay:{}", pay);
+        int result = payService.update(pay);
+        return "成功更新记录，返回值：" + result;
+    }
+
+    @GetMapping("/pay/get/{id}")
+    public Pay getById(@PathVariable("id") Integer id)
+    {
+        log.info("getById:{}", id);
+        Pay pay = payService.getById(id);
+        return pay;
+    }
+}
+```
+
+
