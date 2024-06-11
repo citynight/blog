@@ -1198,6 +1198,16 @@ public class OrderController {
 
 ![重构](https://github.com/citynight/blog-image/assets/7713239/794d47cb-d4e7-4786-a20a-c001e105226c)
 
+重复的代码抽取到 `cloud-api-commons` 模块中后，在原有模块的 pom 中需要引入依赖。
+```xml
+        <!-- 引入自己定义的 api 通用包 -->
+        <dependency>
+            <groupId>cn.citynight.cloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+```
 硬编码写死的问题
 
 ```java
