@@ -215,6 +215,7 @@ jdbc.password=123456
     <version>8.0.11</version>
 </dependency>
 ```
+
 # Mapper4 一键生成
 ## mybatis-generator
 官网地址：https://mybatis.org/generator/
@@ -411,7 +412,7 @@ generatorConfig.xml
 生成后的结果：
 ![entities and mapper](https://github.com/citynight/blog-image/assets/7713239/1d183057-32e7-415c-a6b7-d44c9a9f8f11)
 
-# 微服务
+# 微服务-支付模块
 ## 步骤
 微服务小口诀：
 1. 建 module
@@ -1053,3 +1054,113 @@ public class GlobalExceptionHandler {
 ```
 报错时的显示效果
 ![exception](https://github.com/citynight/blog-image/assets/7713239/1cdb01d8-4d46-4fef-9f4f-54726d40428a)
+
+
+
+
+# 微服务-订单模块
+## 创建步骤
+不再一一说明，步骤还是
+1. 建 module
+2. 改 pom
+3. 写 YML
+4. 主启动
+5. 业务类
+其中pom如下：
+```xml
+
+    <dependencies>
+        <!--web + actuator-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+        </dependency>
+        <!-- http://localhost/swagger-ui/index.html -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+    </dependencies>
+```
+YML配置如下：
+```yml
+server:
+  port: 80
+```
+
+## 什么是 RestTemplate
+[RestTemplate](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html)
+ 提供了多种便捷访问远程 Http 服务的方法，是一种简单便捷的访问 restful 服务的模板类，是 Spring 提供的用于访问 Rest 服务的客户端模板工具集。
+
+### 常用的 API 使用说明
+使用 RestTemplate 访问Restful 接口非常的简单粗暴无脑
+(url,requestMap,ResponseBean.class) 参数分别代表 REST 请求地址、请求参数、HTTP 响应转被转换成的对象类型。
+
+**getForObject 方法和 getForEntity 方法的区别**
+getForObject 方法返回对象为响应体中数据转化成的对象，基本上可以理解为 Json。
+getForEntity 方法返回对象为 ResponseEntity，该对象中包含了响应中的一些重要信息，比如响应头、响应体、响应状态码等数据。
+![getForObject 方法和 getForEntity 方法的区别](https://github.com/citynight/blog-image/assets/7713239/a4e70eb4-1cc7-4343-8942-fd263a7728ba)
+
+**postForObject 方法和 postForEntity 方法的区别**
+![postForObject 方法和 postForEntity 方法的区别](https://github.com/citynight/blog-image/assets/7713239/ecd96e24-f0ea-4c69-8a2f-62c841ede481)
+
+**get 请求方法**
+![get 请求方法](https://github.com/citynight/blog-image/assets/7713239/ba14ae58-ca03-4d1c-879a-ecac210cda52)
+**post 请求方法**
+![post 请求方法](https://github.com/citynight/blog-image/assets/7713239/a5250fc1-fa29-4097-b6b7-998e6a3ac0bc)
+
+
+使用 RestTemplate 有两种方，一种使用 new RestTemplate() 对象访问方式，另一种是使用 config 配置类。
+推荐使用 config 配置类。
+```java
+@Configuration
+public class RestTemplateConfig {
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+```
+
+controller 类
+```java
+
+@RestController
+public class OrderController {
+    public static final String PaymentSrv_URL = "http://localhost:8001"; // 先写死，硬编码
+
+    @Resource
+    private RestTemplate restTemplate;
+
+    @GetMapping("/consumer/pay/add")
+    public ResultData addOrder(PayDTO payDTO) {
+        System.out.println("payDTO = " + payDTO);
+        return restTemplate.postForObject(PaymentSrv_URL + "/pay/add", payDTO, ResultData.class);
+    }
+
+    @GetMapping("/consumer/pay/get/{id}")
+    public ResultData getPayInfo(@PathVariable("id") Integer id) {
+        return restTemplate.getForObject(PaymentSrv_URL + "/pay/get/" + id, ResultData.class, id);
+    }
+}
+```
