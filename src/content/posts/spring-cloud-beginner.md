@@ -412,6 +412,7 @@ generatorConfig.xml
 ![entities and mapper](https://github.com/citynight/blog-image/assets/7713239/1d183057-32e7-415c-a6b7-d44c9a9f8f11)
 
 # 微服务
+## 步骤
 微服务小口诀：
 1. 建 module
 2. 改 pom
@@ -419,7 +420,7 @@ generatorConfig.xml
 4. 主启动
 5. 业务类
 
-步骤
+具体步骤
 1. 建 module
     建普通 Maven 模块 ![cloud-provider-payment](https://github.com/citynight/blog-image/assets/7713239/2d2a675c-5e1d-4ec9-a4ac-67b0312f13ea)
 2. 改 pom
@@ -634,7 +635,7 @@ public class PayController {
     }
 }
 ```
-
+## 接口测试
 **postman测试**
 ![postman](https://github.com/citynight/blog-image/assets/7713239/0bf5a52d-3401-4acd-9dd1-fdc9126aecf3)
 
@@ -899,3 +900,156 @@ public class Swagger3Config {
 尝试使用 swagger 测试
 ![](https://github.com/citynight/blog-image/assets/7713239/7ea32cb8-8be3-4a6c-8d18-a3d90c2ef75e)
 ![](https://github.com/citynight/blog-image/assets/7713239/33b7c2b1-e3c6-4208-9e89-2050979afe9f)
+
+
+## 解决项目中的问题
+### 时间格式问题
+有两种方式可以解决时间格式问题
+1. 在实体类中添加 @JsonFormat 注解
+
+```java
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+```
+2. 在配置文件中添加如下配置
+```xml
+spring:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+```
+
+推荐使用注解。
+
+### 统一返回值
+**思路**
+定义返回标准格式,如下
+1. code 状态值：由后端统一定义各种返回结果的状态码
+2. message 状态描述：本次接口调用返回结果的状态描述
+3. data 返回数据：本次接口调用返回的数据
+4. 扩展字段：接口调用时间之类，比如 timestamp
+
+**步骤**
+1. 新建枚举类 `ReturnCodeEnum`
+HTTP 请求返回的状态码
+
+| 分类  | 区间      | 分类描述                   |
+|-----|---------|------------------------|
+| 1** | 100～199 | 信息，服务区收到请求，需要请求者继续执行操作 |
+| 2** | 200～299 | 成功，操作被成功接收并处理          |
+| 3** | 300～399 | 重定向，需要进一步的操作以完成请求      |
+| 4** | 400～499 | 客户端错误，请求包含语法错误或无法完成请求  |
+| 5** | 500～599 | 服务器错误，服务器在处理请求的过程中出现错误 |
+
+
+
+```java
+
+import java.util.Arrays;
+
+@Getter
+public enum ReturnCodeEnum {
+
+    // 如何定义一个通用的枚举值， 举值-构造-遍历
+
+    
+    // 1. 举值
+    RC999(999, "操作失败"),
+    RC200(200, "操作成功"),
+    RC201(201, "服务开启降级保护, 请稍后再试"),
+    RC202(202, "热点参数限流, 请稍后再试"),
+    RC203(203, "系统规则不满足要求, 请稍后再试"),
+    RC204(204, "授权规则不通过, 请稍后再试"),
+    RC375(375, "数学运算异常, 请稍后再试"),
+    RC401(401, "匿名用户无法访问该资源"),
+    RC403(403, "无访问权限, 请联系管理员授权"),
+    RC404(404, "无法找到页面"),
+    RC500(500, "系统异常, 请稍后再试"),
+    CLIENT_AUTHENTICATION_FAILED(1001, "客户端认证失败"),
+    USER_OR_PASSWORD_ERROR(1002, "用户名或密码错误"),
+    UNSUPPORTED_GRANT_TYPE(1003, "不支持的认证模式"),
+    ;
+
+    // 2. 构造
+    // 自定义状态码
+    private final Integer code;
+
+    // 自定义描述
+    private final String message;
+
+    ReturnCodeEnum(Integer code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    // 3. 遍历
+   // 3.1 传统版
+    public static ReturnCodeEnum getReturnCodeEnumV1(Integer code) {
+        for (ReturnCodeEnum returnCodeEnum : ReturnCodeEnum.values()) {
+            if (returnCodeEnum.getCode().equals(code)) {
+                return returnCodeEnum;
+            }
+        }
+        return null;
+    }
+
+    // 3.2 lambda版
+    public static ReturnCodeEnum getReturnCodeEnumV2(Integer code) {
+        return Arrays.stream(ReturnCodeEnum.values())
+                .filter(returnCodeEnum -> returnCodeEnum.getCode().equals(code))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV1(200));
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV1(200).getCode());
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV1(200).getMessage());
+
+        System.out.println();
+
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV2(404));
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV2(404).getCode());
+        System.out.println(ReturnCodeEnum.getReturnCodeEnumV2(404).getMessage());
+    }
+}
+
+```
+2. 新建统一返回对象 `ResultData`
+
+```java
+
+@Data
+@Accessors(chain = true) // 链式编程
+public class ResultData<T> {
+
+    private Integer code;
+    private String message;
+    private T data;
+    private Long timestamp;
+
+    public static <T> ResultData<T> success(T data) {
+        return new ResultData<T>().setCode(ReturnCodeEnum.RC200.getCode()).setMessage(ReturnCodeEnum.RC200.getMessage()).setData(data).setTimestamp(System.currentTimeMillis());
+    }
+    public static <T> ResultData<T> fail(ReturnCodeEnum returnCodeEnum) {
+        return new ResultData<T>().setCode(returnCodeEnum.getCode()).setMessage(returnCodeEnum.getMessage()).setTimestamp(System.currentTimeMillis());
+    }
+}
+```
+3. 全局异常接入返回的标准格式
+```java
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResultData<String> exception(Exception e){
+        log.error("全局异常信息：", e.getMessage(), e);
+
+        return ResultData.fail(ReturnCodeEnum.RC500.getCode(), e.getMessage());
+    }
+}
+
+```
+报错时的显示效果
+![exception](https://github.com/citynight/blog-image/assets/7713239/1cdb01d8-4d46-4fef-9f4f-54726d40428a)
