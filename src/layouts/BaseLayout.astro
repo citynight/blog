@@ -45,7 +45,14 @@ const normalizeTitle = !title ? SITE.title : `${title} | ${SITE.title}`
         }
         requestAnimationFrame(raf)
     </script>
-    <GoogleAnalytics />
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-75ZPTWVVP5"></script>
+    <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-75ZPTWVVP5');
+    </script>
 </head>
 <body class="bg-neutral-200 selection:bg-yellow-400 selection:text-neutral-700 dark:bg-neutral-800">
 <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
