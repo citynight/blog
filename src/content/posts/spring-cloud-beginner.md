@@ -1193,6 +1193,7 @@ public class OrderController {
 ```
 
 # 重构
+## 抽取重复代码
 系统中有重复部分，重构。
 新建 `cloud-api-commons` 模块，对外暴露通用的组件/api/接口/工具类等。`
 
@@ -1208,7 +1209,7 @@ public class OrderController {
         </dependency>
 
 ```
-硬编码写死的问题
+## 硬编码写死的问题
 
 ```java
     public static final String PaymentSrv_URL = "http://localhost:8001"; // 先写死，硬编码
@@ -1220,3 +1221,36 @@ public class OrderController {
 3. 如果系统需要支持更高的并发，需要部署更多的订单微服务和支付微服务，硬编码订单微服务后续的维护将变得异常复杂。
 
 所以在微服务开发的过程中，需要引入服务治理功能，实现微服务之间的动态注册与发现，从此刻开始正式进入 SpringCloud。
+
+# 服务注册中心 consul 
+consul 是一个服务注册与发现工具，它提供了微服务注册与发现功能，并且支持服务健康检查。
+## 为什么要引入服务注册中心
+为了解决上面 IP 地址和端口号硬编码的问题。
+
+## 能做什么
+1. 服务的发现， 提供HTTP 和 DNS 两种发现方式。
+2. 健康检查， 支持多种方式， HTTP、TCP、Docker、Shell 脚本定制。
+3. KV 存储，Key-Value 存储，用于存储配置信息。
+4. 多数据中心， Consul 支持多数据中心。
+5. 可视化界面， Consul 提供了 Web UI，可以方便的查看服务注册情况。
+
+下载地址：https://developer.hashicorp.com/consul/install
+
+使用，
+1. 下载 consul，解压到任意目录，并添加到环境变量。
+```shell
+# 复制到 /usr/local/bin
+cp /Users/logan/Downloads/consul_1.18.2_darwin_arm64/consul /usr/loc
+al/bin
+# 查看版本，如果生效了则能正常显示信息
+consul --version
+```
+![添加到环境变量](https://github.com/citynight/blog-image/assets/7713239/31e8784e-90f4-481a-988e-8dd52f5f0546)
+
+2. 启动 consul
+```shell
+consul agent -dev
+```
+访问 http://localhost:8500
+![启动 consul](https://github.com/citynight/blog-image/assets/7713239/6374f445-c920-43b2-a31a-672d1e504138)
+3. 服务注册与发现
