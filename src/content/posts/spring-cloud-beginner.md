@@ -1251,6 +1251,118 @@ consul --version
 ```shell
 consul agent -dev
 ```
+结束 consul
+```shell
+consul leave
+```
+
 访问 http://localhost:8500
 ![启动 consul](https://github.com/citynight/blog-image/assets/7713239/6374f445-c920-43b2-a31a-672d1e504138)
 3. 服务注册与发现
+
+支付服务 provider 8001 注册进 consul
+修改 pom
+```xml
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+        </dependency>
+```
+修改 yml
+```yaml
+spring:   
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+```
+
+修改主启动类
+```java
+@SpringBootApplication
+@MapperScan("cn.citynight.cloud.mapper")
+@EnableDiscoveryClient
+public class Main8001 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main8001.class, args);
+    }
+}
+```
+根据日志信息
+![](https://github.com/citynight/blog-image/assets/7713239/53d7d377-864c-4643-847d-3cf950073da2)
+为了避免潜在冲突移除掉`commons-logging`
+所以修改pom文件
+```xml
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+```
+然后发现consul 中报错
+![](https://github.com/citynight/blog-image/assets/7713239/4165ecb6-3ee7-42dd-bcd3-91cbff5f9d1f)
+修改 yml 配置
+```xml
+spring:
+  application:
+    name: cloud-consumer-order
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        prefer-ip-address: true
+#        heartbeat:
+#          enabled: true # 开启健康检查
+```
+
+`prefer-ip-address: true` 或者 
+```
+#        heartbeat:
+#          enabled: true # 开启健康检查
+```
+这两个配置一个就不会报错。按照教程是配置`prefer-ip-address`我在网上搜的是第二个，测试都正常。
+这样修改后启动服务，然后 postman 测试发现
+![](https://github.com/citynight/blog-image/assets/7713239/a3a193c8-c61a-4b30-8c50-a513fa64e9b6)
+报错的原因是 consul 天生就是负载均衡的，所以需要修改`RestTemplateConfig`给`RestTemplate` 添加负载均衡注解
+```java
+@Configuration
+public class RestTemplateConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+```
+这样就能正常访问了。
+
+## consul 与其他注册中心的对比
+
+1. CAP理论关注粒度是数据,而不是整体系统设计的策略
+    C： Consistency （强一致性）
+    A： Availability （可用性）
+    P： Partition tolerance （分区容错）
+2. 经典的 CAP 图
+   >引用：最多只能同时较好的满足两个。 CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求， 因此，根据 CAP 原理将 NoSQL 数据库分成了满足 CA 原则、满足 CP 原则和满足 AP 原则三 大类：
+   > 1.CA - 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。 
+   > 2.CP - 满足一致性，分区容忍必的系统，通常性能不是特别高。 
+   > 3.AP - 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。
+
+![img.png](https://img-blog.csdnimg.cn/99317ce68fa74504ba39a28c5ee08134.png)
+3. 三个注册中心的异同点
+
+| 组件名       | 语言   | CAP | 服务健康检查 | 对外暴露接口   | SpringCloud 集成 |
+|-----------|------|-----|--------|----------|----------------|
+| consul    | Go   | CP  | 支持     | HTTP/DNS | 已集成            |
+| eureka    | Java | AP  | 可配支持   | HTTP     | 已集成            |
+| zookeeper | Java | CP  | 支持     | 客户端      | 已集成            |
+
