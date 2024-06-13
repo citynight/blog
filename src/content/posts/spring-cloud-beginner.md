@@ -1454,3 +1454,22 @@ mybatis:
 ![](https://github.com/citynight/blog-image/assets/7713239/4060d0f5-3c36-47f2-8881-0abd4fc6bf00)
 
 ⚠️注意： 目前已经能正常使用了，但是还有一个问题就是 consul 重启后配置丢失没有持久化存储。
+
+
+# 负载均衡
+## 概述
+### LB 负载均衡（Load Balance）是什么
+简单的说就是将用户的请求平摊的分配到多个服务上，从而达到系统的 HA（高可用），常见的负载均衡有软件 Nginx，LVS，硬件 F5等。
+
+### spring-cloud-loadbalancer 组件是什么
+Spring Cloud LoadBalancer 是 Spring Cloud 官方提供的一个开源的、简单易用的客户端负载均衡器。它包含在 spring-cloud-commons 中，用它来替换了以前的 Ribbon 组件。相较于Ribbon，LoadBalancer 不仅能否支持 RestTemplate，还能支持其他客户端，如 WebClient(WeClient 是Spring Web Flux中提供的功能，可以实现响应式异步请求)
+
+## 面试题
+客户端负载 VS 服务端负载区别
+
+load balancer 本地负载均衡客户端 VS Nginx 服务端负载均衡的区别
+Nginx 是服务器负载均衡，客户端所有请求都会交给Nginx，然后由 Nginx 实现转发请求，即负载均衡是由服务端实现的。
+load balancer 本地负载均衡，在调用微服务接口时候，会在注册中心上获取注册信息服务器列表之后缓存到 JVM 本地，从而在本地实现 RPC 远程服务调用技术。
+
+## 实战
+![](https://github.com/citynight/blog-image/assets/7713239/e0e9b2b7-7228-4a4c-abde-444ba98f5cf7)
