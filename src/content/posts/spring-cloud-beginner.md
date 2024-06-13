@@ -1351,13 +1351,15 @@ public class RestTemplateConfig {
     C： Consistency （强一致性）
     A： Availability （可用性）
     P： Partition tolerance （分区容错）
-2. 经典的 CAP 图
-   >引用：最多只能同时较好的满足两个。 CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求， 因此，根据 CAP 原理将 NoSQL 数据库分成了满足 CA 原则、满足 CP 原则和满足 AP 原则三 大类：
-   > 1.CA - 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。 
-   > 2.CP - 满足一致性，分区容忍必的系统，通常性能不是特别高。 
-   > 3.AP - 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。
+2. 经典的 CAP 图 
 
-![img.png](https://img-blog.csdnimg.cn/99317ce68fa74504ba39a28c5ee08134.png)
+引用：最多只能同时较好的满足两个。 CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求， 因此，根据 CAP 原理将 NoSQL 数据库分成了满足 CA 原则、满足 CP 原则和满足 AP 原则三 大类：
+
+  * CA - 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。 
+  * CP - 满足一致性，分区容忍必的系统，通常性能不是特别高。 
+  * AP - 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。
+
+      ![img.png](https://img-blog.csdnimg.cn/99317ce68fa74504ba39a28c5ee08134.png)
 3. 三个注册中心的异同点
 
 | 组件名       | 语言   | CAP | 服务健康检查 | 对外暴露接口   | SpringCloud 集成 |
@@ -1366,3 +1368,83 @@ public class RestTemplateConfig {
 | eureka    | Java | AP  | 可配支持   | HTTP     | 已集成            |
 | zookeeper | Java | CP  | 支持     | 客户端      | 已集成            |
 
+## consul 配置
+
+### 写 pom 文件
+在 cloud-provider-payment 的pom 中添加
+```xml
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+```
+
+### 改 yml 文件
+创建 `bootstrap.yml`,把 application.yml 配置复制过来，然后修改
+```yaml
+
+spring:
+  application:
+    name: cloud-payment-service
+  ### Spring Cloud Consul for Service Discovery
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        prefer-ip-address: true
+      config:
+        profile-separator: '-' # default value is ',', but we use '-' in our project
+        format: YAML
+```
+修改后的`application.yml`
+```yaml
+server:
+  port: 8001
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring-cloud-study?characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+    username: root
+    password:
+  profiles:
+    active: dev #多环境配置加载内容 dev/prod,不写默认就是 default 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: cn.citynight.cloud.entities
+  configuration:
+    map-underscore-to-camel-case: true
+```
+
+在 consul 中添加配置
+创建文件夹以`/` 结尾
+![](https://github.com/citynight/blog-image/assets/7713239/8842466a-5fea-422e-be73-e2e818131c0e)
+创建对应的子文件夹
+![](https://github.com/citynight/blog-image/assets/7713239/22bdb3f0-ee73-4ee8-be0b-852bb1b695d7)
+给每个环境创建配置文件
+![](https://github.com/citynight/blog-image/assets/7713239/ba015648-5ba3-4b53-ac88-473d5a680438)
+> 注意：
+> 1. 文件结尾不要带`/`
+> 2. yaml 不要使用制表符，使用空格
+
+### 业务类
+在控制器中创建测试代码
+```java
+    @Value("${server.port}")
+    private String port;
+
+    @GetMapping("/pay/get/info")
+    public String getInfoByConsul(@Value("${citynight.info}") String citynight)
+    {
+        return "当前端口：" + port + "\t，citynight：" + citynight;
+    }
+```
+启动服务，然后测试
+![](https://github.com/citynight/blog-image/assets/7713239/33b2e051-a61f-4b2d-b8da-3b2669daf4e2)
