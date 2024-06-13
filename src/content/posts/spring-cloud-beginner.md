@@ -1448,3 +1448,9 @@ mybatis:
 ```
 启动服务，然后测试
 ![](https://github.com/citynight/blog-image/assets/7713239/33b2e051-a61f-4b2d-b8da-3b2669daf4e2)
+
+## consul 刷新
+官网配置说明 https://docs.spring.io/spring-cloud-consul/docs/current/reference/html/appendix.html
+![](https://github.com/citynight/blog-image/assets/7713239/4060d0f5-3c36-47f2-8881-0abd4fc6bf00)
+
+⚠️注意： 目前已经能正常使用了，但是还有一个问题就是 consul 重启后配置丢失没有持久化存储。
