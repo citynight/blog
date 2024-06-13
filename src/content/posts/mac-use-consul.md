@@ -63,7 +63,9 @@ consul agent -server -ui -bootstrap-expect=1 -client=0.0.0.0 -bind 192.168.3.21 
 浏览器访问 http://localhost:8500 能正常访问
 
 ## 常用命令
-首先前面的 consul 肯定是省略不了了，看一下其他参数：
+官网命令介绍地址：https://developer.hashicorp.com/consul/commands
+
+接上面，首先前面的 consul 肯定是省略不了了，看一下其他参数：
 
 ### 常用command命令
 * `agent`：运行一个consul agent
