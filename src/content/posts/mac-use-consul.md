@@ -3,7 +3,7 @@ title: "在Mac电脑使用Consul"
 description: "在Mac电脑中安装并使用Consul"
 pubDate: "2024-06-13 21:54:00"
 category: "spring"
-banner: "@images/banners/consul.png"
+banner: "@images/banners/consul.webp"
 tags: ["spring", "java"]
 selected: false
 ---
