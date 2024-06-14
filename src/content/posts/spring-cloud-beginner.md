@@ -1472,4 +1472,22 @@ Nginx 是服务器负载均衡，客户端所有请求都会交给Nginx，然后
 load balancer 本地负载均衡，在调用微服务接口时候，会在注册中心上获取注册信息服务器列表之后缓存到 JVM 本地，从而在本地实现 RPC 远程服务调用技术。
 
 ## 实战
+
 ![](https://github.com/citynight/blog-image/assets/7713239/e0e9b2b7-7228-4a4c-abde-444ba98f5cf7)
+1. 复制一份 8001 的代码，改端口为 8002，然后启动。
+2. 修改 80 服务，pom 添加
+```yaml
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+```
+3. 修改 80 controller，添加
+```java
+    @GetMapping("/pay/get/info")
+    public String getInfoByConsul(@Value("${citynight.info}") String citynight)
+    {
+        return "当前端口：" + port + "\t，citynight：" + citynight;
+    }
+```
+4. 启动80 服务，访问 80 服务，发现端口会随机切换，说明负载均衡成功。
