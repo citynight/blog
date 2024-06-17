@@ -1491,3 +1491,183 @@ load balancer 本地负载均衡，在调用微服务接口时候，会在注册
     }
 ```
 4. 启动80 服务，访问 80 服务，发现端口会随机切换，说明负载均衡成功。
+
+### 负载均衡算法切换
+在 RestTemplate 中，可以通过添加注解`@LoadBalancerClient(name = "cloud-payment-service", configuration = RestTemplateConfig.class)`,然后实现`ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory)`如下方式切换算法
+```javas
+
+@Configuration
+@LoadBalancerClient(name = "cloud-payment-service", configuration = RestTemplateConfig.class)
+public class RestTemplateConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+    @Bean
+    ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory){
+        String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+        return new RandomLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+    }
+}
+```
+
+
+# OpenFeign 服务接口调用 *
+## 是什么
+官方文档：https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/
+Feign 是一个声明性 web 服务客户端。它使编写 web 服务客户端更加容易。使用Feign，我们只需要创建一个接口并注解它，定义方法名即可。在 Feign 的实现下，只需要创建一个实现类，并使用注解 `@FeignClient` 来绑定服务名，即可完成对服务接口的调用。
+OpenFeign 基本上成为了事实标准。
+
+看下官网的案例
+```java
+@FeignClient("stores")
+public interface StoreClient {
+    @RequestMapping(method = RequestMethod.GET, value = "/stores")
+    List<Store> getStores();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/stores")
+    Page<Store> getStores(Pageable pageable);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/stores/{storeId}", consumes = "application/json")
+    Store update(@PathVariable("storeId") Long storeId, Store store);
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/stores/{storeId:\\d+}")
+    void delete(@PathVariable Long storeId);
+}
+```
+## 可以干什么
+1. 可插拔的注解支持，包括 Feign 注解和 JAX-RS 注解。
+2. 支持可插拔的 HTTP 编码器和解码器。
+3. 支持 Sentinel 和它的 Fallback
+4. 支持 SpringCloudLoadBalancer 的负载均衡
+5. 支持 HTTP 请求和响应的压缩
+
+## OpenFeign 快速入门
+创建cloud-consumer-feign-order80 模块，添加依赖
+```xml
+<dependencies>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+    <!-- consul discovery -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <!-- 引入自己定义的 api 通用包 -->
+    <dependency>
+        <groupId>cn.citynight.cloud</groupId>
+        <artifactId>cloud-api-commons</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <!--web + actuator-->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.alibaba.fastjson2</groupId>
+        <artifactId>fastjson2</artifactId>
+    </dependency>
+    <!-- http://localhost/swagger-ui/index.html -->
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    </dependency>
+</dependencies>
+```
+
+在 common 的pom 中添加
+
+```xml
+        <!-- openfeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+```
+创建 PayFeignApi 接口
+```java
+
+@FeignClient(value = "cloud-payment-service")
+public interface PayFeignApi {
+    /**
+     * 新增支付流水记录
+     * */
+    @PostMapping(value = "/pay/add")
+    public ResultData addPay(@RequestBody PayDTO payDTO);
+
+    /**
+     * 根据id查询支付流水记录
+     * */
+    @GetMapping(value = "/pay/get/{id}")
+    public ResultData getPayInfo(@PathVariable("id") Integer id);
+
+    /**
+     * 测试负载均衡
+     * */
+    @GetMapping(value = "/pay/get/info")
+    public String mylb();
+}
+
+```
+
+
+在 cloud-consumer-feign-order80 创建 controller
+```java
+
+@RestController
+@Slf4j
+public class OrderController {
+
+    @Resource
+    private PayFeignApi payFeignApi;
+
+    @PostMapping(value = "/feign/pay/add")
+    public ResultData addOrder(@RequestBody PayDTO payDTO) {
+        log.info("第一步：模拟本地 addOrder 新增订单成功（省略 sql 操作），第二步: 再开启 addPay 支付微服务远程调用");
+        ResultData resultData = payFeignApi.addPay(payDTO);
+        return resultData;
+    }
+
+    @GetMapping(value = "/feign/pay/get/{id}")
+    public ResultData getPayInfo(@PathVariable("id") Integer id) {
+        log.info("-----支付微服务远程调用，按照 id 查询订单支付流水信息");
+        ResultData payInfo = payFeignApi.getPayInfo(id);
+        return payInfo;
+    }
+    @GetMapping(value = "/feign/pay/mylb")
+    public String mylb() {
+        return payFeignApi.mylb();
+    }
+
+}
+
+```
+
+经测试能正常访问且负载均衡。
