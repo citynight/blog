@@ -1671,3 +1671,48 @@ public class OrderController {
 ```
 
 经测试能正常访问且负载均衡。
+
+## OpenFeign 的高级特性
+1. OpenFeign 超时控制
+2. OpenFeign 重试控制
+3. OpenFeign 默认 HttpClient 修改
+4. OpenFeign 请求/响应压缩
+5. OpenFeign 日志打印功能
+
+```xml
+    openfeign:
+      client:
+        config:
+          default:
+#            链接超时
+            connect-timeout: 3000
+            #            读取超时
+            read-timeout: 3000
+          cloud-payment-service:
+            connect-timeout: 5000
+            read-timeout: 5000
+```
+
+默认 HttpClient 修改
+修改 pom
+```xml
+
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-hc5</artifactId>
+            <version>13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.3.1</version>
+        </dependency>
+```
+修改 yml
+```yaml
+  spring:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
+```
