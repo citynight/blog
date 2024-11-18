@@ -4,6 +4,7 @@ export interface Site {
     url: string
     description: string
     shortDescription: string
+    ICP: string
 }
 
 export interface NavigationLink {
