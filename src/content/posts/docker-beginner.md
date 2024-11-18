@@ -1,7 +1,7 @@
 ---
 title: "学习docker相关内容"
-description: "9月18日目前所在的公司人心浮动， 今年已经有 3 波裁员，其他同事也将在 10 月份确认是否会留下来也就是进行第 4 次裁员。"
-pubDate: "2024-09-18 20:30:00"
+description: "后端除了Java 外还需学习各种相关的技术，比如 docker。本文记录一下学习 docker 的过程。"
+pubDate: "2024-11-18 10:30:00"
 category: "life"
 banner: "@images/banners/雷峰塔.png"
 tags: ["java"]
