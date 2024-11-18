@@ -75,9 +75,11 @@ sudo docker run --name my-nginx -d -p 80:80 nginx
 ```
 此命令将下载Nginx镜像并在后台启动一个容器，映射容器的80端口到主机的80端口。
 
-## 常用命令
+## 命令
 参考雷丰阳的语雀[Docker快速上手](https://www.yuque.com/leifengyang/sutong/au0lv3sv3eldsmn8) 
 文章安装部署部分不太适应，操作命令是适用的。
+
+### 常用命令
 ```shell 
 #查看运行中的容器
 docker ps
@@ -134,4 +136,17 @@ docker login
 docker tag mynginx:v1.0 leifengyang/mynginx:v1.0
 # 推送镜像
 docker push leifengyang/mynginx:v1.0
+```
+
+### 存储
+两种方式，注意区分：
+● 目录挂载： `-v /app/nghtml:/usr/share/nginx/html`
+● 卷映射：`-v ngconf:/etc/nginx`
+
+```shell
+docker run -d -p 99:80 \
+-v /app/nghtml:/usr/share/nginx/html \
+-v ngconf:/etc/nginx \
+--name app03 \
+nginx
 ```
