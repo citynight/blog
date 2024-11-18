@@ -1716,3 +1716,68 @@ public class OrderController {
         hc5:
           enabled: true
 ```
+
+## OpenFeign 日志打印功能
+修改配置文件
+```java
+
+@Configuration
+public class FeignConfig {
+    @Bean
+    public Retryer feignRetryer() {
+        return Retryer.NEVER_RETRY;// 不重试
+//        最大请求次数为 3（1+2），初始间隔时间为 100ms，重试间最大间隔时间为 1s
+//        return new Retryer.Default(100, 1, 3);
+    }
+
+    // 设置 feign 日志级别
+    @Bean
+    public feign.Logger.Level feignLoggerLevel() {
+        return feign.Logger.Level.FULL;
+    }
+}
+
+```
+修改 yml
+```yaml
+# feign 日志以声明级别监控哪个接口
+logging:
+  level:
+    cn:
+      citynight:
+        cloud:
+          apis:
+            PayFeignApi: debug
+
+```
+测试能打印完整的日志
+
+# CircuitBreaker 断路器
+分布式系统面临的问题 
+
+服务雪崩
+第一个微服务质检调用的时候，假设微服务 A 调用微服务 B，微服务 B 调用微服务 C，微服务 C 调用其他微服务，这个所谓的‘扇出’。如果扇出的链路上某个微服务调用响应时间过长或者不可用，对微服务 A 的调用就会占用越来越多的资源，进而引起系统的崩溃，所谓的雪崩效应。
+
+对于高流量的应用来说，单一的后端依赖可能会导致所有服务器上的所有资源都在几秒钟内饱和。比失败更糟糕的是，这些应用程序还可能导致服务质检的延迟增加，备份队列，线程或其他系统紧张，导致整个系统发生更多的级联故障。这些都表示需要对故障和延时进行隔离和管理，以便耽搁依赖关系的失败，不能取消整个应用程序或系统。
+
+所以， 通常当你发现一个模块下的某个实例失败后，这时候这个模块依然还会接收流量，然后这个有问题的模块还调用了其他的模块，这样就会发生级联故障，或者叫雪崩。
+
+问题： 禁止服务雪崩故障
+解决：
+- 有问题的节点，快速熔断（快速返回失败处理或者返回默认兜底数据【服务降级】）
+
+“断路器”本身是一种开关装置，当某个服务单元发生故障后，通过断路器的故障监控（类似熔断保险丝）来“熔断”该服务单元，向调用方返回一个符合预期的、可处理的备选响应（FallBack），而不是长时间的等待或者抛出调用方无法处理的异常，这样就保证了服务调用方的线程不会被长时间、不必要的占用，从而避免了故障在分布式系统中的蔓延，乃至雪崩。一句话，出故障了保险丝跳闸，别把整个家给烧了。
+
+## 实操
+### 熔断（CircuitBreaker）服务熔断 + 服务降级
+* 断路器3大状态
+* 断路器 3 大状态质检的转换
+* 断路器所有配置参数参考
+
+![中文手册精简版](https://github.com/citynight/blog-image/assets/7713239/7ca935a0-68a4-4f21-aa99-ab6710e9b0cc)
+
+客户端配置的 service 和 yml 中需要保持一致。
+![](https://github.com/citynight/blog-image/assets/7713239/c926755b-3ddc-4ec2-94cd-b37041d9920e)
+
+# BulkHead 仓壁隔离
+
