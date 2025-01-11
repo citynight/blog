@@ -2,7 +2,7 @@
 title: "学习docker相关内容"
 description: "后端除了Java 外还需学习各种相关的技术，比如 docker。本文记录一下学习 docker 的过程。"
 pubDate: "2024-11-18 10:30:00"
-category: "life"
+category: "dev"
 banner: "@images/banners/雷峰塔.png"
 tags: ["java"]
 selected: true

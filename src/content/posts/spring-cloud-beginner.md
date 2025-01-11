@@ -2,7 +2,7 @@
 title: "Spring Cloud 初学者"
 description: "从头开始学 SpringCloud"
 pubDate: "2024-06-05 17:04:00"
-category: "spring"
+category: "dev"
 banner: "@images/banners/spring.png"
 tags: ["spring", "java"]
 selected: false
