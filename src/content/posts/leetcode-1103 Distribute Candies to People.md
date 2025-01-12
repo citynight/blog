@@ -2,7 +2,7 @@
 title: "1103. Distribute Candies to People"
 description: "LeetCode 1103 Distribute Candies to People"
 pubDate: "2024-05-25 21:35:00"
-category: "algorithm"
+category: "dev"
 banner: "@images/banners/mountain-2.jpg"
 tags: ["leetcode"]
 selected: false
